@@ -5,7 +5,10 @@ field = Field(4)
 while True:
     field.add_new()
     for i in field.grld:
-        print(i)
+        for j in i:
+            print(f"{j:<4}", end=" ")
+        print()
+        print()
     reply = input("Enter a direction: ")
     match reply:
         case "w":
