@@ -50,11 +50,12 @@ class Field():
     def add_new(self) -> None:
         """Adds a new number to the grld"""
         from random import randint
+        new = 2 if randint(0, 8) != 0 else 4
         while True:
             row = randint(0, self.length-1)
             col = randint(0, self.length-1)
             if self.grld[row][col] == 0:
-                self.grld[row][col] = 2
+                self.grld[row][col] = new
                 break
 
     def check_line(self, line: int, direction: int) -> bool:
