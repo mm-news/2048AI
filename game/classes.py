@@ -1,45 +1,4 @@
-
 """All classes for game in this project"""
-
-
-class Numbers():
-    """Specfic the numbers in the game"""
-
-    def __init__(self, power: int):
-        self.val = 2**power if power != -1 else 0
-
-    def __repr__(self):
-        return self.val
-
-    def __eq__(self, o):
-        return int(self) == o
-
-    def __ne__(self, o):
-        return int(self) != o
-
-    def __gt__(self, o):
-        return int(self) > o
-
-    def __lt__(self, o):
-        return int(self) < o
-
-    def __ge__(self, o):
-        return int(self) >= o
-
-    def __le__(self, o):
-        return int(self) <= o
-
-    def __int__(self):
-        return int(self.val)
-
-    def twic(self):
-        self.val *= 2
-
-    def update(self, new: int):
-        self.val = new
-
-    def reset(self):
-        self.val = 0
 
 
 class Field():
@@ -48,11 +7,13 @@ class Field():
     def __init__(self, length: int):
         """Initalize the field with a length*length grld"""
         self.length = length
-        self.grld = list()
+        self.grld = []
 
-        # generates a 2D list like [[0, 0, 0, ....], [0, 0, 0, ....], [0, 0, 0, ....], ....] but type of 0 is classes.Numbers
+        # generates a 2D list like [[0, 0, 0, ....], [0, 0, 0, ....], [0, 0, 0, ....], ....]
         for i in range(length):
-            self.grld.append([Numbers(-1)]*self.length)
+            self.grld.append([])
+            for j in range(length):
+                self.grld[i].append(0)
 
     def __repr__(self):
         return str(self.grld)
@@ -79,32 +40,71 @@ class Field():
     def get_item(self, row: int, col: int) -> int:
         return self.grld[row][col]
 
-    def edit_item(self, row: int, col: int, new: Numbers) -> None:
+    def edit_item(self, row: int, col: int, new: int) -> None:
         self.grld[row][col] = new
 
-    def move(self, direction: int):
+    def twic(self, old: int) -> int:
+        """Returns the number multiplied by 2"""
+        return old * 2 if old != 0 else 2
+
+    def add_new(self) -> None:
+        """Adds a new number to the grld"""
+        from random import randint
+        self.grld[randint(0, self.length-1)][randint(0, self.length-1)] = 2
+
+    def check_line(self, line: int, direction: int) -> bool:
+        """Check the line was fully moved (0 = ↑, 1 = ↓, 2 = ←, 3 = →)"""
+        if direction > 3:  # if the direction is not in the range
+            raise ValueError("The range of directions is 0-3")
+        if line > self.length:
+            raise ValueError("The range of lines is 0-{}".format(self.length))
+        if direction > 1:  # if the direction is vertical
+            switched = False
+            current = None
+            for i in range(self.length):
+                # if the current number is not the same type (=zero/>zero) as the next number
+                if ((self.grld[line][i] == 0) != (current == 0)) and current != None:
+                    if switched:
+                        return False  # the line is not fully moved
+                    switched = True
+                current = self.grld[line][i]
+            return True  # the line is fully moved
+        else:  # if the direction is horizontal
+            switched = False
+            current = None
+            for i in range(self.length):
+                # if the current number is not the same type (=zero/>zero) as the next number
+                if ((self.grld[i][line] == 0) != (current == 0)) and current != None:
+                    if switched:
+                        return False  # the line is not fully moved
+                    switched = True
+                current = self.grld[i][line]
+            return True  # the line is fully moved
+
+    def move(self, direction: int) -> None:
         """Move the grld in 4 driections (0 = ↑, 1 = ↓, 2 = ←, 3 = →)"""
-        if direction > 3:
+        if direction > 3:  # if the direction is not in the range
             raise ValueError("The range of directions is 0-3")
 
-        match direction:
-            case 0:  # ^
-                pass  # TODO:
-            case 1:  # V
-                pass
-            case 2:  # ->
-                for i in range(self.length):  # TODO: Make the numbers move
-                    for j in range(0, self.length, -1):
-                        if self.grld[i][j] == self.grld[i][j-1] and (self.grld[i][j] != 0) and (self.grld[i][j-1] != 0):
-                            self.grld[i][j-1].twic()
-                            self.grld[i][j].reset()
-                        elif j < self.length:
-                            if self.grld:  # TODO: Check if the number beside is 0
-                                pass
-
-            case 3:  # <-
-                for i in range(self.length):  # TODO: Make the numbers move
-                    for j in range(0, self.length):
-                        if self.grld[i][j] == self.grld[i][j+1] and (self.grld[i][j] != 0) and (self.grld[i][j+1] != 0):
-                            self.grld[i][j].twic()
-                            self.grld[i][j+1].reset()
+        if direction > 1:  # if the direction is horizontal
+            delta = 1 if direction == 3 else -1
+            for i in range(self.length):
+                checked = False
+                while not checked:  # while the line is not fully moved
+                    for j in range(self.length-1, 0, -1) if delta == -1 else range(self.length):
+                        # if the number is not at the end
+                        if (delta == -1 and j != 0) or (delta == 1 and j < self.length - 1):
+                            current = self.grld[i][j]
+                            next_one = self.grld[i][j+delta]
+                            # if the current number is the same as the next number and they are not 0
+                            if current == next_one and (current != 0) and (next_one != 0):
+                                # then twice the next number and reset the current number
+                                self.grld[i][j+delta] = \
+                                    self.twic(next_one)
+                                self.grld[i][j] = 0
+                            # if the next number is 0
+                            elif next_one == 0 and current != 0:
+                                # then update the next number with the current number and reset the current number
+                                self.grld[i][j+delta] = current
+                                self.grld[i][j] = 0
+                    checked = self.check_line(i, 3 if delta == 1 else 2)
