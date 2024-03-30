@@ -50,7 +50,12 @@ class Field():
     def add_new(self) -> None:
         """Adds a new number to the grld"""
         from random import randint
-        self.grld[randint(0, self.length-1)][randint(0, self.length-1)] = 2
+        while True:
+            row = randint(0, self.length-1)
+            col = randint(0, self.length-1)
+            if self.grld[row][col] == 0:
+                self.grld[row][col] = 2
+                break
 
     def check_line(self, line: int, direction: int) -> bool:
         """Check the line was fully moved (0 = ↑, 1 = ↓, 2 = ←, 3 = →)"""
@@ -108,3 +113,25 @@ class Field():
                                 self.grld[i][j+delta] = current
                                 self.grld[i][j] = 0
                     checked = self.check_line(i, 3 if delta == 1 else 2)
+
+        else:  # if the direction is vertical
+            delta = 1 if direction == 1 else -1
+            for i in range(self.length):
+                checked = False
+                while not checked:  # while the line is not fully moved
+                    for j in range(self.length-1, 0, -1) if delta == -1 else range(self.length):
+                        # if the number is not at the end
+                        if (delta == -1 and j != 0) or (delta == 1 and j < self.length - 1):
+                            current = self.grld[j][i]
+                            next_one = self.grld[j+delta][i]
+                            if current == next_one and (current != 0) and (next_one != 0):
+                                # then twice the next number and reset the current number
+                                self.grld[j+delta][i] = \
+                                    self.twic(next_one)
+                                self.grld[j][i] = 0
+                            # if the next number is 0
+                            elif next_one == 0 and current != 0:
+                                # then update the next number with the current number and reset the current number
+                                self.grld[j+delta][i] = current
+                                self.grld[j][i] = 0
+                    checked = self.check_line(i, 1 if delta == 1 else 0)
