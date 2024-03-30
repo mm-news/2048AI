@@ -1,4 +1,4 @@
-from game.classes import Field
+from classes import Field
 
 field = Field(4)
 
