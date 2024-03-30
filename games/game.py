@@ -16,6 +16,8 @@ while True:
             field.move(2)
         case "d":
             field.move(3)
+        case "":
+            pass
         case _:
             break
     print()
