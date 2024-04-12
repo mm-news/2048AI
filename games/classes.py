@@ -69,22 +69,22 @@ class Field():
             current = None
             for i in range(self.length):
                 # if the current number is not the same type (=zero/>zero) as the next number
-                if ((self.grld[line][i] == 0) != (current == 0)) and current != None:
+                if ((self.get_item(line, i) == 0) != (current == 0)) and current != None:
                     if switched:
                         return False  # the line is not fully moved
                     switched = True
-                current = self.grld[line][i]
+                current = self.get_item(line, i)
             return True  # the line is fully moved
         else:  # if the direction is horizontal
             switched = False
             current = None
             for i in range(self.length):
                 # if the current number is not the same type (=zero/>zero) as the next number
-                if ((self.grld[i][line] == 0) != (current == 0)) and current != None:
+                if ((self.get_item(i, line) == 0) != (current == 0)) and current != None:
                     if switched:
                         return False  # the line is not fully moved
                     switched = True
-                current = self.grld[i][line]
+                current = self.get_item(i, line)
             return True  # the line is fully moved
 
     def move(self, direction: int) -> None:
@@ -100,19 +100,18 @@ class Field():
                     for j in range(self.length-1, 0, -1) if delta == -1 else range(self.length):
                         # if the number is not at the end
                         if (delta == -1 and j != 0) or (delta == 1 and j < self.length - 1):
-                            current = self.grld[i][j]
-                            next_one = self.grld[i][j+delta]
+                            current = self.get_item(i, j)
+                            next_one = self.get_item(i, j+delta)
                             # if the current number is the same as the next number and they are not 0
                             if current == next_one and (current != 0) and (next_one != 0):
                                 # then twice the next number and reset the current number
-                                self.grld[i][j+delta] = \
-                                    self.twic(next_one)
-                                self.grld[i][j] = 0
+                                self.edit_item(i, j+delta, self.twic(next_one))
+                                self.edit_item(i, j, 0)
                             # if the next number is 0
                             elif next_one == 0 and current != 0:
                                 # then update the next number with the current number and reset the current number
-                                self.grld[i][j+delta] = current
-                                self.grld[i][j] = 0
+                                self.edit_item(i, j+delta, current)
+                                self.edit_item(i, j, 0)
                     checked = self.check_line(i, 3 if delta == 1 else 2)
 
         else:  # if the direction is vertical
@@ -123,16 +122,15 @@ class Field():
                     for j in range(self.length-1, 0, -1) if delta == -1 else range(self.length):
                         # if the number is not at the end
                         if (delta == -1 and j != 0) or (delta == 1 and j < self.length - 1):
-                            current = self.grld[j][i]
-                            next_one = self.grld[j+delta][i]
+                            current = self.get_item(j, i)
+                            next_one = self.get_item(j+delta, i)
                             if current == next_one and (current != 0) and (next_one != 0):
                                 # then twice the next number and reset the current number
-                                self.grld[j+delta][i] = \
-                                    self.twic(next_one)
-                                self.grld[j][i] = 0
+                                self.edit_item(j+delta, i, self.twic(next_one))
+                                self.edit_item(j, i, 0)
                             # if the next number is 0
                             elif next_one == 0 and current != 0:
                                 # then update the next number with the current number and reset the current number
-                                self.grld[j+delta][i] = current
-                                self.grld[j][i] = 0
+                                self.edit_item(j+delta, i, current)
+                                self.edit_item(j, i, 0)
                     checked = self.check_line(i, 1 if delta == 1 else 0)
